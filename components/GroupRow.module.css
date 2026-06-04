@@ -1,0 +1,85 @@
+.groupRow {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  background: var(--surface-2);
+  position: relative;
+}
+
+.colorBar {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+  opacity: 1;
+}
+
+.toggleBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+.groupName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex: 1;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-3);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.groupRow:hover .editBtn {
+  opacity: 1;
+}
+
+.editBtn:hover {
+  color: var(--text-primary);
+}
+
+.editBtn svg {
+  width: 16px;
+  height: 16px;
+}

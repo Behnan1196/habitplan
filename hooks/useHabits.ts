@@ -1,0 +1,136 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { AppState, HabitItem, CellState } from '@/types';
+import { loadState, saveState, getWeekKey, addWeeks, nextCellState } from '@/lib/storage';
+
+export function useHabits() {
+  const [state, setState] = useState<AppState | null>(null);
+  const [currentWeek, setCurrentWeek] = useState<string>('');
+
+  useEffect(() => {
+    const loaded = loadState();
+    setState(loaded);
+    setCurrentWeek(getWeekKey(new Date()));
+  }, []);
+
+  const update = useCallback((updater: (prev: AppState) => AppState) => {
+    setState(prev => {
+      if (!prev) return prev;
+      const next = updater(prev);
+      saveState(next);
+      return next;
+    });
+  }, []);
+
+  // --- Cell ---
+  const cycleCell = useCallback((habitId: string, dayIndex: number) => {
+    update(prev => {
+      const weekData = prev.weeklyData[currentWeek] ?? {};
+      const habitData = weekData[habitId] ?? {};
+      const current: CellState = (habitData[dayIndex] as CellState) ?? 'empty';
+      const next = nextCellState(current);
+      const newHabitData = { ...habitData };
+      if (next === 'empty') {
+        delete newHabitData[dayIndex];
+      } else {
+        newHabitData[dayIndex] = next;
+      }
+      const newWeekData = { ...weekData, [habitId]: newHabitData };
+      return { ...prev, weeklyData: { ...prev.weeklyData, [currentWeek]: newWeekData } };
+    });
+  }, [currentWeek, update]);
+
+  const getCellState = useCallback((habitId: string, dayIndex: number): CellState => {
+    if (!state) return 'empty';
+    return (state.weeklyData[currentWeek]?.[habitId]?.[dayIndex] as CellState) ?? 'empty';
+  }, [state, currentWeek]);
+
+  // --- Group collapse ---
+  const toggleGroup = useCallback((groupId: string) => {
+    update(prev => {
+      const collapsed = prev.collapsedGroups.includes(groupId)
+        ? prev.collapsedGroups.filter(id => id !== groupId)
+        : [...prev.collapsedGroups, groupId];
+      return { ...prev, collapsedGroups: collapsed };
+    });
+  }, [update]);
+
+  const isCollapsed = useCallback((groupId: string): boolean => {
+    return state?.collapsedGroups.includes(groupId) ?? false;
+  }, [state]);
+
+  // --- Habits CRUD ---
+  const addHabit = useCallback((item: Omit<HabitItem, 'id' | 'order'>) => {
+    update(prev => {
+      const id = `h-${Date.now()}`;
+      const order = Math.max(...prev.habits.map(h => h.order), -1) + 1;
+      return { ...prev, habits: [...prev.habits, { ...item, id, order }] };
+    });
+  }, [update]);
+
+  const updateHabit = useCallback((id: string, changes: Partial<HabitItem>) => {
+    update(prev => ({
+      ...prev,
+      habits: prev.habits.map(h => h.id === id ? { ...h, ...changes } : h),
+    }));
+  }, [update]);
+
+  const deleteHabit = useCallback((id: string) => {
+    update(prev => ({
+      ...prev,
+      habits: prev.habits.filter(h => h.id !== id && h.groupId !== id),
+      collapsedGroups: prev.collapsedGroups.filter(gid => gid !== id),
+    }));
+  }, [update]);
+
+  const reorderHabits = useCallback((sourceIndex: number, destinationIndex: number, groupId: string | null) => {
+    update(prev => {
+      const habits = [...prev.habits];
+      const siblings = habits.filter(h => h.groupId === groupId).sort((a, b) => a.order - b.order);
+      
+      if (sourceIndex < 0 || sourceIndex >= siblings.length || destinationIndex < 0 || destinationIndex >= siblings.length) {
+        return prev;
+      }
+      
+      const [movedItem] = siblings.splice(sourceIndex, 1);
+      siblings.splice(destinationIndex, 0, movedItem);
+      
+      siblings.forEach((item, idx) => {
+        const hIndex = habits.findIndex(h => h.id === item.id);
+        if (hIndex >= 0) {
+          habits[hIndex] = { ...habits[hIndex], order: idx };
+        }
+      });
+      
+      return { ...prev, habits };
+    });
+  }, [update]);
+
+  // --- Week navigation ---
+  const goToPrevWeek = useCallback(() => setCurrentWeek(w => addWeeks(w, -1)), []);
+  const goToNextWeek = useCallback(() => setCurrentWeek(w => addWeeks(w, 1)), []);
+  const goToCurrentWeek = useCallback(() => setCurrentWeek(getWeekKey(new Date())), []);
+
+  const isCurrentWeek = currentWeek === getWeekKey(new Date());
+
+  const sortedHabits = state?.habits.slice().sort((a, b) => a.order - b.order) ?? [];
+
+  return {
+    state,
+    sortedHabits,
+    currentWeek,
+    isCurrentWeek,
+    cycleCell,
+    getCellState,
+    toggleGroup,
+    isCollapsed,
+    addHabit,
+    updateHabit,
+    deleteHabit,
+    reorderHabits,
+    goToPrevWeek,
+    goToNextWeek,
+    goToCurrentWeek,
+  };
+}

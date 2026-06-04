@@ -1,0 +1,66 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px 8px;
+  margin-bottom: 4px;
+  position: relative;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.labelBtn {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 12px;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.15s;
+}
+
+.labelBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.row:hover .editBtn {
+  opacity: 1;
+}
+
+.editBtn:hover {
+  color: var(--text-primary);
+}
+
+.editBtn svg {
+  width: 16px;
+  height: 16px;
+}

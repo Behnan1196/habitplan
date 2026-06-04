@@ -1,0 +1,90 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-height: 56px;
+  position: relative;
+  background: var(--surface-2);
+  border-radius: 10px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: var(--surface-3);
+}
+
+.colorBar {
+  width: 4px;
+  align-self: stretch;
+  flex-shrink: 0;
+  border-radius: 10px 0 0 10px;
+  opacity: 0.8;
+}
+
+.nameCell {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.nameBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border-radius: 6px;
+}
+
+.nameContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.nameTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notes {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  margin-left: 16px; /* align with text after dot */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.8;
+}
+
+.cells {
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px 8px 0;
+  flex-shrink: 0;
+}
