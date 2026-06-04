@@ -10,11 +10,18 @@ interface Props {
   completedCount: number;
   onToggle: () => void;
   onEdit: () => void;
+  dragHandleProps?: any;
 }
 
-export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit }: Props) {
+export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps }: Props) {
   return (
     <div className={styles.groupRow} style={{ '--group-color': group.color } as React.CSSProperties}>
+      <div className={styles.dragHandle} {...dragHandleProps}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+        </svg>
+      </div>
       <div className={styles.colorBar} style={{ background: group.color }} />
       <button className={styles.toggleBtn} onClick={onToggle} title={isCollapsed ? 'Genişlet' : 'Daralt'}>
         <svg

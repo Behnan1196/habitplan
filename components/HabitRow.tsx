@@ -12,11 +12,20 @@ interface Props {
   onCycleCell: (habitId: string, dayIndex: number) => void;
   onEdit: () => void;
   todayIndex: number;
+  dragHandleProps?: any;
 }
 
-export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex }: Props) {
+export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex, dragHandleProps }: Props) {
   return (
     <div className={styles.row}>
+      {/* Drag Handle */}
+      <div className={styles.dragHandle} {...dragHandleProps}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+        </svg>
+      </div>
+
       {/* Color accent bar */}
       <div className={styles.colorBar} style={{ background: habit.color }} />
 

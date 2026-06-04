@@ -110,11 +110,10 @@ export default function HabitTable() {
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                         className={snapshot.isDragging ? styles.dragging : ''}
                       >
                         {item.type === 'separator' && (
-                          <SeparatorRow item={item} onEdit={() => openEditModal(item)} />
+                          <SeparatorRow item={item} onEdit={() => openEditModal(item)} dragHandleProps={provided.dragHandleProps} />
                         )}
                         
                         {item.type === 'habit' && (
@@ -125,6 +124,7 @@ export default function HabitTable() {
                             onCycleCell={cycleCell}
                             onEdit={() => openEditModal(item)}
                             todayIndex={todayIndex}
+                            dragHandleProps={provided.dragHandleProps}
                           />
                         )}
 
@@ -141,6 +141,7 @@ export default function HabitTable() {
                               }, 0)}
                               onToggle={() => toggleGroup(item.id)}
                               onEdit={() => openEditModal(item)}
+                              dragHandleProps={provided.dragHandleProps}
                             />
                             
                             {!isCollapsed(item.id) && (
@@ -157,7 +158,6 @@ export default function HabitTable() {
                                           <div
                                             ref={providedChild.innerRef}
                                             {...providedChild.draggableProps}
-                                            {...providedChild.dragHandleProps}
                                             className={snapshotChild.isDragging ? styles.dragging : ''}
                                           >
                                             <HabitRow
@@ -167,6 +167,7 @@ export default function HabitTable() {
                                               onCycleCell={cycleCell}
                                               onEdit={() => openEditModal(child)}
                                               todayIndex={todayIndex}
+                                              dragHandleProps={providedChild.dragHandleProps}
                                             />
                                           </div>
                                         )}
