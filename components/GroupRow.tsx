@@ -11,17 +11,20 @@ interface Props {
   onToggle: () => void;
   onEdit: () => void;
   dragHandleProps?: any;
+  isEditMode?: boolean;
 }
 
-export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps }: Props) {
+export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps, isEditMode }: Props) {
   return (
     <div className={styles.groupRow} style={{ '--group-color': group.color } as React.CSSProperties}>
-      <div className={styles.dragHandle} {...dragHandleProps}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
-          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
-        </svg>
-      </div>
+      {isEditMode && (
+        <div className={styles.dragHandle} {...dragHandleProps}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+            <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+          </svg>
+        </div>
+      )}
       <div className={styles.colorBar} style={{ background: group.color }} />
       <button className={styles.toggleBtn} onClick={onToggle} title={isCollapsed ? 'Genişlet' : 'Daralt'}>
         <svg
@@ -36,11 +39,13 @@ export default function GroupRow({ group, isCollapsed, childCount, completedCoun
           {completedCount}/{childCount}
         </span>
       </button>
-      <button className={styles.editBtn} onClick={onEdit} title="Grubu düzenle">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
-        </svg>
-      </button>
+      {isEditMode && (
+        <button className={styles.editBtn} onClick={onEdit} title="Grubu düzenle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ export default function HabitTable() {
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<Partial<HabitItem> | undefined>(undefined);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const days = useMemo(() => getWeekDates(currentWeek), [currentWeek]);
   
@@ -70,12 +71,20 @@ export default function HabitTable() {
           <h1 className={styles.title}>Alışkanlıklar</h1>
           <p className={styles.subtitle}>Haftanı planla ve takip et</p>
         </div>
-        <button className={styles.addBtn} onClick={openAddModal}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
+        <div className={styles.headerActions}>
+          <button 
+            className={`${styles.toggleEditBtn} ${isEditMode ? styles.editActive : ''}`} 
+            onClick={() => setIsEditMode(!isEditMode)}
+          >
+            {isEditMode ? 'Bitti' : 'Düzenle'}
+          </button>
+          <button className={styles.addBtn} onClick={openAddModal}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <WeekNavigation
@@ -113,7 +122,12 @@ export default function HabitTable() {
                         className={snapshot.isDragging ? styles.dragging : ''}
                       >
                         {item.type === 'separator' && (
-                          <SeparatorRow item={item} onEdit={() => openEditModal(item)} dragHandleProps={provided.dragHandleProps} />
+                          <SeparatorRow 
+                            item={item} 
+                            onEdit={() => openEditModal(item)} 
+                            dragHandleProps={provided.dragHandleProps} 
+                            isEditMode={isEditMode}
+                          />
                         )}
                         
                         {item.type === 'habit' && (
@@ -125,6 +139,7 @@ export default function HabitTable() {
                             onEdit={() => openEditModal(item)}
                             todayIndex={todayIndex}
                             dragHandleProps={provided.dragHandleProps}
+                            isEditMode={isEditMode}
                           />
                         )}
 
@@ -142,6 +157,7 @@ export default function HabitTable() {
                               onToggle={() => toggleGroup(item.id)}
                               onEdit={() => openEditModal(item)}
                               dragHandleProps={provided.dragHandleProps}
+                              isEditMode={isEditMode}
                             />
                             
                             {!isCollapsed(item.id) && (
@@ -168,6 +184,9 @@ export default function HabitTable() {
                                               onEdit={() => openEditModal(child)}
                                               todayIndex={todayIndex}
                                               dragHandleProps={providedChild.dragHandleProps}
+                                              isEditMode={isEditMode}
+                                              isChild={true}
+                                              groupColor={item.color}
                                             />
                                           </div>
                                         )}

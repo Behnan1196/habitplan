@@ -160,3 +160,4 @@
   border-color: var(--accent);
 }
 .dragging { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); border-radius: 10px; opacity: 0.95; transform: scale(1.02); z-index: 100; background: var(--surface-1); } 
+.headerActions { display: flex; align-items: center; gap: 8px; } .toggleEditBtn { background: var(--surface-3); border: none; padding: 8px 14px; border-radius: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-size: 0.85rem; } .toggleEditBtn.editActive { background: var(--text-primary); color: var(--bg-color); } 
