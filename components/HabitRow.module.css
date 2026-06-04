@@ -88,4 +88,6 @@
   padding: 8px 10px 8px 0;
   flex-shrink: 0;
 }
-.dragHandle { padding: 8px; color: var(--text-muted); cursor: grab; opacity: 0.5; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; } .dragHandle:hover { opacity: 1; } .dragHandle svg { width: 16px; height: 16px; } 
+.dragHandle {
+  padding: 8px 2px 8px 4px;
+  color: var(--text-muted); cursor: grab; opacity: 0.5; transition: opacity 0.2s; display: flex; align-items: center; justify-content: center; } .dragHandle:hover { opacity: 1; } .dragHandle svg { width: 16px; height: 16px; }
