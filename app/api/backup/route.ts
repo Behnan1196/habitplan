@@ -56,19 +56,26 @@ async function getBackups(): Promise<any[]> {
   }
 }
 
-async function saveBackups(backups: any[]): Promise<boolean> {
+async function saveBackups(backups: any[]): Promise<void> {
   const isVercelKv = !!process.env.KV_REST_API_URL && !!process.env.KV_REST_API_TOKEN;
 
   if (isVercelKv) {
     const result = await runRedisCommand(['SET', REDIS_KEY, JSON.stringify(backups)]);
-    return result !== null;
+    if (result === null) {
+      throw new Error('Vercel KV veritabanına yazılırken bir hata oluştu.');
+    }
   } else {
+    // Check if running on Vercel without KV
+    const isVercel = !!process.env.VERCEL;
+    if (isVercel) {
+      throw new Error('Bulut yedekleme altyapısı (Vercel KV) bağlanmamış. Lütfen Vercel panelinden projenize bir KV veritabanı ekleyin.');
+    }
+
     try {
       await fs.writeFile(BACKUP_FILE, JSON.stringify(backups, null, 2), 'utf8');
-      return true;
     } catch (error) {
       console.error('Failed to write local backup file:', error);
-      return false;
+      throw new Error('Lokal yedek dosyası (backups.json) yazılamadı.');
     }
   }
 }
@@ -98,11 +105,7 @@ export async function POST(request: Request) {
 
     // Keep only the last 3 backups
     const updatedBackups = [newBackup, ...currentBackups].slice(0, 3);
-    const success = await saveBackups(updatedBackups);
-
-    if (!success) {
-      return NextResponse.json({ success: false, error: 'Failed to save backup' }, { status: 500 });
-    }
+    await saveBackups(updatedBackups);
 
     return NextResponse.json({ success: true, backups: updatedBackups });
   } catch (error: any) {
