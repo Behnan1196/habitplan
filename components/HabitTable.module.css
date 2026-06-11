@@ -161,3 +161,130 @@
 }
 .dragging { box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); border-radius: 10px; opacity: 0.95; transform: scale(1.02); z-index: 100; background: var(--surface-1); } 
 .headerActions { display: flex; align-items: center; gap: 8px; } .toggleEditBtn { background: var(--surface-3); border: none; padding: 8px 14px; border-radius: 12px; font-weight: 600; color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-size: 0.85rem; } .toggleEditBtn.editActive { background: var(--text-primary); color: var(--bg-color); } 
+
+/* Backup Header Button */
+.backupHeaderBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backupHeaderBtn:hover {
+  background: var(--surface-4);
+  transform: translateY(-2px);
+}
+
+.backupHeaderBtn:active {
+  transform: scale(0.95);
+}
+
+.backupHeaderBtn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Segmented View Mode Toggle */
+.viewModeToggle {
+  display: flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 3px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.toggleTab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 9px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.activeTab {
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Horizontal Day Selector in Daily View */
+.daySelectorBar {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  padding: 2px 0;
+}
+
+.daySelectorTab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.daySelectorTab:hover {
+  background: var(--surface-3);
+  transform: translateY(-1px);
+}
+
+.selectedDayTab {
+  background: var(--text-primary) !important;
+  border-color: var(--text-primary) !important;
+}
+
+.selectedDayTab .daySelectLetter {
+  color: var(--bg-color) !important;
+  opacity: 0.8;
+}
+
+.selectedDayTab .daySelectNumber {
+  color: var(--bg-color) !important;
+}
+
+.daySelectLetter {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.daySelectNumber {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.todayDayTab {
+  border-color: var(--accent);
+}
+
+.todayDayTab:not(.selectedDayTab) .daySelectNumber {
+  color: var(--accent);
+}
+
+.dailyHeaderLabel {
+  width: 34px;
+}

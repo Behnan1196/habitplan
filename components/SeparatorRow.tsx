@@ -13,14 +13,23 @@ interface Props {
 export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode }: Props) {
   return (
     <div className={styles.row}>
-      {isEditMode && (
-        <div className={styles.dragHandle} {...dragHandleProps}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
-            <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
-          </svg>
-        </div>
-      )}
+      <div 
+        className={styles.dragHandle} 
+        {...dragHandleProps}
+        style={!isEditMode ? {
+          width: 0,
+          padding: 0,
+          margin: 0,
+          opacity: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none'
+        } : undefined}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+        </svg>
+      </div>
       <div className={styles.line}></div>
       <button className={styles.labelBtn} onClick={isEditMode ? onEdit : undefined} title={isEditMode ? "Ayıracı düzenle" : ""}>
         {item.name}

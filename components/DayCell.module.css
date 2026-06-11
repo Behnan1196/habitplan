@@ -71,3 +71,16 @@
 .today {
   box-shadow: 0 0 0 2px var(--accent-dim);
 }
+
+/* Large mode for daily view */
+.large {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+}
+
+.large .icon {
+  width: 18px;
+  height: 18px;
+}
+

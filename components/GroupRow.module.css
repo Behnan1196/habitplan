@@ -5,8 +5,13 @@
   border-radius: 10px;
   margin-bottom: 4px;
   overflow: hidden;
-  background: var(--surface-2);
+  background: var(--surface-1);
   position: relative;
+  transition: background 0.15s;
+}
+
+.groupRow:hover {
+  background: var(--surface-2);
 }
 
 .colorBar {

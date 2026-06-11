@@ -1,15 +1,16 @@
 'use client';
 
 import { useHabits } from '@/hooks/useHabits';
-import { getWeekDates, formatWeekLabel } from '@/lib/storage';
+import { getWeekDates, formatWeekLabel, saveState } from '@/lib/storage';
 import { HabitItem } from '@/types';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import HabitRow from './HabitRow';
 import GroupRow from './GroupRow';
 import SeparatorRow from './SeparatorRow';
 import WeekNavigation from './WeekNavigation';
 import EditModal from './EditModal';
+import BackupModal from './BackupModal';
 import { DAY_LABELS } from '@/types';
 import styles from './HabitTable.module.css';
 
@@ -25,11 +26,25 @@ export default function HabitTable() {
   const [editItem, setEditItem] = useState<Partial<HabitItem> | undefined>(undefined);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // New states for Daily/Weekly mode and Cloud Backup
+  const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);
+  const [backupModalOpen, setBackupModalOpen] = useState(false);
+
   const days = useMemo(() => getWeekDates(currentWeek), [currentWeek]);
   
   const today = new Date();
   today.setHours(0,0,0,0);
   const todayIndex = days.findIndex(d => d.getTime() === today.getTime());
+
+  // Automatically select today if it's in the current week, otherwise default to Monday (0)
+  useEffect(() => {
+    if (todayIndex !== -1) {
+      setSelectedDayIndex(todayIndex);
+    } else {
+      setSelectedDayIndex(0);
+    }
+  }, [todayIndex, currentWeek]);
 
   if (!state) return <div className={styles.loading}>Yükleniyor...</div>;
 
@@ -64,6 +79,8 @@ export default function HabitTable() {
     reorderHabits(source.index, destination.index, groupId);
   };
 
+  const activeDayIndexForBadge = todayIndex !== -1 ? todayIndex : selectedDayIndex;
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -78,6 +95,17 @@ export default function HabitTable() {
           >
             {isEditMode ? 'Bitti' : 'Düzenle'}
           </button>
+          
+          <button 
+            className={styles.backupHeaderBtn} 
+            onClick={() => setBackupModalOpen(true)}
+            title="Bulut Yedekleme"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.3-2-1.9-3.6-3.9-3.9C17 4 13.6 1.8 9.7 3 6.6 4 4.3 6.8 4 10c-2 .4-3.5 2-3.8 4-.3 1.8.4 3.5 1.8 4.5.6.4 1.2.5 2 .5h14c1.7 0 3-1.3 3.2-3z" />
+            </svg>
+          </button>
+
           <button className={styles.addBtn} onClick={openAddModal}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -85,6 +113,22 @@ export default function HabitTable() {
             </svg>
           </button>
         </div>
+      </div>
+
+      {/* Segmented control for View Mode */}
+      <div className={styles.viewModeToggle}>
+        <button 
+          className={`${styles.toggleTab} ${viewMode === 'daily' ? styles.activeTab : ''}`}
+          onClick={() => setViewMode('daily')}
+        >
+          Günlük
+        </button>
+        <button 
+          className={`${styles.toggleTab} ${viewMode === 'weekly' ? styles.activeTab : ''}`}
+          onClick={() => setViewMode('weekly')}
+        >
+          Haftalık
+        </button>
       </div>
 
       <WeekNavigation
@@ -95,18 +139,40 @@ export default function HabitTable() {
         onToday={goToCurrentWeek}
       />
 
-      <div className={styles.tableWrapper}>
-        <div className={styles.tableHeader}>
-          <div className={styles.nameHeader}>Görev</div>
-          <div className={styles.daysHeader}>
-            {days.map((d, i) => (
-              <div key={i} className={`${styles.dayLabel} ${i === todayIndex ? styles.todayLabel : ''}`}>
-                <span className={styles.dayLetter}>{DAY_LABELS[i]}</span>
-                <span className={styles.dayNumber}>{d.getDate()}</span>
-              </div>
-            ))}
-          </div>
+      {/* Horizontal Day Selector in Daily View */}
+      {viewMode === 'daily' && (
+        <div className={styles.daySelectorBar}>
+          {days.map((d, i) => {
+            const isToday = i === todayIndex;
+            const isSelected = i === selectedDayIndex;
+            return (
+              <button
+                key={i}
+                className={`${styles.daySelectorTab} ${isSelected ? styles.selectedDayTab : ''} ${isToday ? styles.todayDayTab : ''}`}
+                onClick={() => setSelectedDayIndex(i)}
+              >
+                <span className={styles.daySelectLetter}>{DAY_LABELS[i]}</span>
+                <span className={styles.daySelectNumber}>{d.getDate()}</span>
+              </button>
+            );
+          })}
         </div>
+      )}
+
+      <div className={styles.tableWrapper}>
+        {viewMode === 'weekly' && (
+          <div className={styles.tableHeader}>
+            <div className={styles.nameHeader}>Görev</div>
+            <div className={styles.daysHeader}>
+              {days.map((d, i) => (
+                <div key={i} className={`${styles.dayLabel} ${i === todayIndex ? styles.todayLabel : ''}`}>
+                  <span className={styles.dayLetter}>{DAY_LABELS[i]}</span>
+                  <span className={styles.dayNumber}>{d.getDate()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="top-level" type="top-level">
@@ -140,6 +206,7 @@ export default function HabitTable() {
                             todayIndex={todayIndex}
                             dragHandleProps={provided.dragHandleProps}
                             isEditMode={isEditMode}
+                            selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
                           />
                         )}
 
@@ -148,12 +215,28 @@ export default function HabitTable() {
                             <GroupRow
                               group={item}
                               isCollapsed={isCollapsed(item.id)}
-                              childCount={sortedHabits.filter(h => h.groupId === item.id).length}
-                              completedCount={sortedHabits.filter(h => h.groupId === item.id).reduce((acc, child) => {
-                                let c = 0;
-                                for(let i=0; i<7; i++) if (getCellState(child.id, i) === 'done') c++;
-                                return acc + c;
-                              }, 0)}
+                              childCount={(() => {
+                                const groupChildren = sortedHabits.filter(h => h.groupId === item.id);
+                                let plannedCount = 0;
+                                groupChildren.forEach(child => {
+                                  const cellState = getCellState(child.id, activeDayIndexForBadge);
+                                  if (cellState === 'done' || cellState === 'planned') {
+                                    plannedCount++;
+                                  }
+                                });
+                                return plannedCount;
+                              })()}
+                              completedCount={(() => {
+                                const groupChildren = sortedHabits.filter(h => h.groupId === item.id);
+                                let completedCount = 0;
+                                groupChildren.forEach(child => {
+                                  const cellState = getCellState(child.id, activeDayIndexForBadge);
+                                  if (cellState === 'done') {
+                                    completedCount++;
+                                  }
+                                });
+                                return completedCount;
+                              })()}
                               onToggle={() => toggleGroup(item.id)}
                               onEdit={() => openEditModal(item)}
                               dragHandleProps={provided.dragHandleProps}
@@ -187,6 +270,7 @@ export default function HabitTable() {
                                               isEditMode={isEditMode}
                                               isChild={true}
                                               groupColor={item.color}
+                                              selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
                                             />
                                           </div>
                                         )}
@@ -224,6 +308,16 @@ export default function HabitTable() {
         onSave={handleSave}
         onDelete={editItem?.id ? () => deleteHabit(editItem.id!) : undefined}
         onClose={() => setEditModalOpen(false)}
+      />
+
+      <BackupModal
+        open={backupModalOpen}
+        onClose={() => setBackupModalOpen(false)}
+        currentState={state}
+        onRestore={(restoredState) => {
+          saveState(restoredState);
+          window.location.reload();
+        }}
       />
     </div>
   );

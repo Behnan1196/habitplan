@@ -4,7 +4,7 @@
   gap: 0;
   min-height: 56px;
   position: relative;
-  background: var(--surface-2);
+  background: var(--surface-1);
   border-radius: 10px;
   margin-bottom: 4px;
   overflow: hidden;
@@ -12,7 +12,7 @@
 }
 
 .row:hover {
-  background: var(--surface-3);
+  background: var(--surface-2);
 }
 
 .colorBar {
@@ -73,10 +73,10 @@
 }
 
 .childRow {
-  background: var(--surface-1);
+  background: var(--surface-2);
 }
 .childRow:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
 }
 
 .cells {

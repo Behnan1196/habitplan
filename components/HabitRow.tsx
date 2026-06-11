@@ -16,23 +16,33 @@ interface Props {
   isEditMode?: boolean;
   isChild?: boolean;
   groupColor?: string;
+  selectedDayIndex?: number;
 }
 
-export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex, dragHandleProps, isEditMode, isChild, groupColor }: Props) {
+export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex, dragHandleProps, isEditMode, isChild, groupColor, selectedDayIndex }: Props) {
   // Use group color if it's a child, else habit color
   const effectiveColor = isChild && groupColor ? groupColor : habit.color;
 
   return (
     <div className={`${styles.row} ${isChild ? styles.childRow : ''}`}>
-      {/* Drag Handle - Only show in edit mode */}
-      {isEditMode && (
-        <div className={styles.dragHandle} {...dragHandleProps}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
-            <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
-          </svg>
-        </div>
-      )}
+      {/* Drag Handle - Always render in DOM but hide visually when not in edit mode */}
+      <div 
+        className={styles.dragHandle} 
+        {...dragHandleProps}
+        style={!isEditMode ? {
+          width: 0,
+          padding: 0,
+          margin: 0,
+          opacity: 0,
+          overflow: 'hidden',
+          pointerEvents: 'none'
+        } : undefined}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/>
+          <circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/>
+        </svg>
+      </div>
 
       {/* Color accent bar */}
       <div className={styles.colorBar} style={{ background: effectiveColor }} />
@@ -52,14 +62,23 @@ export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdi
 
       {/* Day cells */}
       <div className={styles.cells}>
-        {days.map((_, i) => (
+        {selectedDayIndex !== undefined ? (
           <DayCell
-            key={i}
-            state={getCellState(habit.id, i)}
-            onClick={() => onCycleCell(habit.id, i)}
-            isToday={i === todayIndex}
+            state={getCellState(habit.id, selectedDayIndex)}
+            onClick={() => onCycleCell(habit.id, selectedDayIndex)}
+            isToday={selectedDayIndex === todayIndex}
+            large={true}
           />
-        ))}
+        ) : (
+          days.map((_, i) => (
+            <DayCell
+              key={i}
+              state={getCellState(habit.id, i)}
+              onClick={() => onCycleCell(habit.id, i)}
+              isToday={i === todayIndex}
+            />
+          ))
+        )}
       </div>
     </div>
   );

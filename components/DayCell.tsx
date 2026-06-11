@@ -8,12 +8,13 @@ interface Props {
   onClick: () => void;
   dayLabel?: string;
   isToday?: boolean;
+  large?: boolean;
 }
 
-export default function DayCell({ state, onClick, isToday }: Props) {
+export default function DayCell({ state, onClick, isToday, large }: Props) {
   return (
     <button
-      className={`${styles.cell} ${styles[state]} ${isToday ? styles.today : ''}`}
+      className={`${styles.cell} ${styles[state]} ${isToday ? styles.today : ''} ${large ? styles.large : ''}`}
       onClick={onClick}
       title={state === 'empty' ? 'Boş' : state === 'planned' ? 'Planlandı' : 'Tamamlandı'}
     >
