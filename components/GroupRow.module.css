@@ -62,6 +62,16 @@
   border-radius: 999px;
 }
 
+.badgePlanned {
+  color: #fff;
+  background: #f59e0b; /* Orange */
+}
+
+.badgeDone {
+  color: #fff;
+  background: #10b981; /* Green */
+}
+
 .editBtn {
   background: none;
   border: none;

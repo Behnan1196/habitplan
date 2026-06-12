@@ -15,6 +15,11 @@ interface Props {
 }
 
 export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps, isEditMode }: Props) {
+  const badgeClass = childCount === 0
+    ? styles.badge
+    : completedCount === childCount
+      ? `${styles.badge} ${styles.badgeDone}`
+      : `${styles.badge} ${styles.badgePlanned}`;
   return (
     <div className={styles.groupRow} style={{ '--group-color': group.color } as React.CSSProperties}>
       <div 
@@ -44,7 +49,7 @@ export default function GroupRow({ group, isCollapsed, childCount, completedCoun
           <polyline points="6 9 12 15 18 9" />
         </svg>
         <span className={styles.groupName} style={{ color: group.color }}>{group.name}</span>
-        <span className={styles.badge}>
+        <span className={badgeClass}>
           {completedCount}/{childCount}
         </span>
       </button>
