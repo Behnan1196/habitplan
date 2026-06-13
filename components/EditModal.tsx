@@ -95,8 +95,8 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           rows={3}
         />
 
-        {/* Group select (only for habits) */}
-        {type === 'habit' && groups.length > 0 && (
+        {/* Group select (only for habits and separators) */}
+        {(type === 'habit' || type === 'separator') && groups.length > 0 && (
           <>
             <label className={styles.label}>Grup (opsiyonel)</label>
             <select

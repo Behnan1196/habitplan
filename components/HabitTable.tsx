@@ -259,19 +259,29 @@ export default function HabitTable() {
                                             {...providedChild.draggableProps}
                                             className={snapshotChild.isDragging ? styles.dragging : ''}
                                           >
-                                            <HabitRow
-                                              habit={child}
-                                              days={days}
-                                              getCellState={getCellState}
-                                              onCycleCell={cycleCell}
-                                              onEdit={() => openEditModal(child)}
-                                              todayIndex={todayIndex}
-                                              dragHandleProps={providedChild.dragHandleProps}
-                                              isEditMode={isEditMode}
-                                              isChild={true}
-                                              groupColor={item.color}
-                                              selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
-                                            />
+                                            {child.type === 'separator' ? (
+                                              <SeparatorRow
+                                                item={child}
+                                                onEdit={() => openEditModal(child)}
+                                                dragHandleProps={providedChild.dragHandleProps}
+                                                isEditMode={isEditMode}
+                                                isChild={true}
+                                              />
+                                            ) : (
+                                              <HabitRow
+                                                habit={child}
+                                                days={days}
+                                                getCellState={getCellState}
+                                                onCycleCell={cycleCell}
+                                                onEdit={() => openEditModal(child)}
+                                                todayIndex={todayIndex}
+                                                dragHandleProps={providedChild.dragHandleProps}
+                                                isEditMode={isEditMode}
+                                                isChild={true}
+                                                groupColor={item.color}
+                                                selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
+                                              />
+                                            )}
                                           </div>
                                         )}
                                       </Draggable>

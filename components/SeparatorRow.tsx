@@ -8,11 +8,12 @@ interface Props {
   onEdit: () => void;
   dragHandleProps?: any;
   isEditMode?: boolean;
+  isChild?: boolean;
 }
 
-export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode }: Props) {
+export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode, isChild }: Props) {
   return (
-    <div className={styles.row}>
+    <div className={`${styles.row} ${isChild ? styles.childRow : ''}`}>
       <div 
         className={styles.dragHandle} 
         {...dragHandleProps}
