@@ -15,8 +15,6 @@
 
 .childRow {
   background: var(--surface-2);
-  margin-left: 16px;
-  width: calc(100% - 16px);
 }
 .childRow:hover {
   background: var(--surface-3);

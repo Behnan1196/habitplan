@@ -7,6 +7,7 @@ export interface HabitItem {
   type: HabitType;
   name: string;
   color: string;
+  backColor?: string;
   groupId: string | null; // null = top level
   order: number;
   notes?: string;

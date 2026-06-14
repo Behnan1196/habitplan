@@ -1,13 +1,13 @@
 'use client';
 
 import { HabitItem, PRESET_COLORS } from '@/types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './EditModal.module.css';
 
 interface Props {
   open: boolean;
   initial?: Partial<HabitItem>;
-  groups: HabitItem[];
+  groups: HabitItem[]; // now flat list of all groups
   onSave: (item: Omit<HabitItem, 'id' | 'order'>) => void;
   onDelete?: () => void;
   onClose: () => void;
@@ -17,6 +17,7 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
   const [name, setName] = useState('');
   const [type, setType] = useState<'habit' | 'group' | 'separator'>('habit');
   const [color, setColor] = useState(PRESET_COLORS[0].value);
+  const [backColor, setBackColor] = useState('');
   const [groupId, setGroupId] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
 
@@ -25,6 +26,7 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
       setName(initial?.name ?? '');
       setType(initial?.type ?? 'habit');
       setColor(initial?.color ?? PRESET_COLORS[0].value);
+      setBackColor(initial?.backColor ?? '');
       setGroupId(initial?.groupId ?? null);
       setNotes(initial?.notes ?? '');
     }
@@ -38,11 +40,36 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
       name: name.trim(), 
       type, 
       color, 
-      groupId: type === 'group' ? null : groupId,
+      backColor: backColor || undefined,
+      groupId,
       notes: notes.trim()
     });
     onClose();
   };
+
+  const isDescendant = (childId: string, potentialParentId: string): boolean => {
+    if (childId === potentialParentId) return true;
+    const parent = groups.find(g => g.id === potentialParentId);
+    if (!parent || !parent.groupId) return false;
+    return isDescendant(childId, parent.groupId);
+  };
+
+  const getGroupPath = (gId: string): string => {
+    const g = groups.find(x => x.id === gId);
+    if (!g) return '';
+    if (!g.groupId) return g.name;
+    return getGroupPath(g.groupId) + ' > ' + g.name;
+  };
+
+  const availableGroups = groups.filter(g => {
+    if (type === 'group' && initial?.id) {
+       if (isDescendant(initial.id, g.id)) return false;
+    }
+    return true;
+  }).map(g => ({
+    id: g.id,
+    pathName: getGroupPath(g.id)
+  })).sort((a, b) => a.pathName.localeCompare(b.pathName));
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -91,12 +118,12 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           className={styles.textarea}
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          placeholder="Bu alışkanlık/öğe ile ilgili ek bilgiler..."
-          rows={3}
+          placeholder="Bu öğe ile ilgili ek bilgiler..."
+          rows={2}
         />
 
-        {/* Group select (only for habits and separators) */}
-        {(type === 'habit' || type === 'separator') && groups.length > 0 && (
+        {/* Group select (now available for groups too!) */}
+        {groups.length > 0 && (
           <>
             <label className={styles.label}>Grup (opsiyonel)</label>
             <select
@@ -105,25 +132,48 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
               onChange={e => setGroupId(e.target.value || null)}
             >
               <option value=''>— Gruba bağlı değil —</option>
-              {groups.map(g => (
-                <option key={g.id} value={g.id}>{g.name}</option>
+              {availableGroups.map(g => (
+                <option key={g.id} value={g.id}>{g.pathName}</option>
               ))}
             </select>
           </>
         )}
 
-        {/* Color picker */}
-        <label className={styles.label}>Renk</label>
-        <div className={styles.colorGrid}>
-          {PRESET_COLORS.map(c => (
-            <button
-              key={c.value}
-              className={`${styles.colorDot} ${color === c.value ? styles.selectedColor : ''}`}
-              style={{ backgroundColor: c.value }}
-              onClick={() => setColor(c.value)}
-              title={c.label}
-            />
-          ))}
+        <div style={{ display: 'flex', gap: '20px', marginTop: '16px' }}>
+          <div style={{ flex: 1 }}>
+            <label className={styles.label}>Yazı Rengi</label>
+            <div className={styles.colorGrid}>
+              {PRESET_COLORS.map(c => (
+                <button
+                  key={c.value}
+                  className={`${styles.colorDot} ${color === c.value ? styles.selectedColor : ''}`}
+                  style={{ backgroundColor: c.value }}
+                  onClick={() => setColor(c.value)}
+                  title={c.label}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <div style={{ flex: 1 }}>
+            <label className={styles.label}>Arka Plan Rengi</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <input 
+                type="color" 
+                value={backColor || '#2c2e3e'} 
+                onChange={e => setBackColor(e.target.value)} 
+                style={{ width: '40px', height: '40px', padding: 0, border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              />
+              {backColor && (
+                <button 
+                  onClick={() => setBackColor('')}
+                  style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  Temizle
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Actions */}

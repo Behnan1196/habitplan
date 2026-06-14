@@ -26,7 +26,6 @@ export default function HabitTable() {
   const [editItem, setEditItem] = useState<Partial<HabitItem> | undefined>(undefined);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // New states for Daily/Weekly mode and Cloud Backup
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);
   const [backupModalOpen, setBackupModalOpen] = useState(false);
@@ -37,7 +36,6 @@ export default function HabitTable() {
   today.setHours(0,0,0,0);
   const todayIndex = days.findIndex(d => d.getTime() === today.getTime());
 
-  // Automatically select today if it's in the current week, otherwise default to Monday (0)
   useEffect(() => {
     if (todayIndex !== -1) {
       setSelectedDayIndex(todayIndex);
@@ -80,6 +78,113 @@ export default function HabitTable() {
   };
 
   const activeDayIndexForBadge = todayIndex !== -1 ? todayIndex : selectedDayIndex;
+
+  const getGroupStats = (groupId: string, dayIndex: number) => {
+    let planned = 0;
+    let completed = 0;
+    const countStats = (parentId: string) => {
+      const children = sortedHabits.filter(h => h.groupId === parentId);
+      for (const child of children) {
+        if (child.type === 'habit') {
+          const st = getCellState(child.id, dayIndex);
+          if (st === 'done' || st === 'planned') planned++;
+          if (st === 'done') completed++;
+        } else if (child.type === 'group') {
+          countStats(child.id);
+        }
+      }
+    };
+    countStats(groupId);
+    return { planned, completed };
+  };
+
+  // A truly recursive component to handle infinite depth
+  const RenderNodeWithDrag = ({ item, depth, groupColor, dragHandleProps }: { item: HabitItem, depth: number, groupColor?: string, dragHandleProps?: any }) => {
+    if (item.type === 'separator') {
+      return (
+        <SeparatorRow 
+          item={item} 
+          onEdit={() => openEditModal(item)} 
+          dragHandleProps={dragHandleProps}
+          isEditMode={isEditMode}
+          depth={depth}
+        />
+      );
+    }
+    
+    if (item.type === 'habit') {
+      return (
+        <HabitRow
+          habit={item}
+          days={days}
+          getCellState={getCellState}
+          onCycleCell={cycleCell}
+          onEdit={() => openEditModal(item)}
+          todayIndex={todayIndex}
+          dragHandleProps={dragHandleProps}
+          isEditMode={isEditMode}
+          depth={depth}
+          groupColor={groupColor}
+          selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
+        />
+      );
+    }
+
+    if (item.type === 'group') {
+      const stats = getGroupStats(item.id, activeDayIndexForBadge);
+      const children = sortedHabits.filter(h => h.groupId === item.id);
+      
+      return (
+        <div className={styles.groupSection} style={{ width: '100%' }}>
+          <GroupRow
+            group={item}
+            isCollapsed={isCollapsed(item.id)}
+            childCount={stats.planned}
+            completedCount={stats.completed}
+            onToggle={() => toggleGroup(item.id)}
+            onEdit={() => openEditModal(item)}
+            dragHandleProps={dragHandleProps}
+            isEditMode={isEditMode}
+            depth={depth}
+          />
+          
+          {!isCollapsed(item.id) && (
+            <Droppable droppableId={`group-${item.id}`} type={item.id}>
+              {(providedGroup) => (
+                <div 
+                  className={styles.groupChildren} 
+                  ref={providedGroup.innerRef} 
+                  {...providedGroup.droppableProps}
+                >
+                  {children.map((child, childIdx) => (
+                    <Draggable key={child.id} draggableId={child.id} index={childIdx}>
+                      {(providedChild, snapshotChild) => (
+                        <div
+                          ref={providedChild.innerRef}
+                          {...providedChild.draggableProps}
+                          className={snapshotChild.isDragging ? styles.dragging : ''}
+                        >
+                          <RenderNodeWithDrag 
+                            item={child} 
+                            depth={depth + 1} 
+                            groupColor={item.color} 
+                            dragHandleProps={providedChild.dragHandleProps} 
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {providedGroup.placeholder}
+                </div>
+              )}
+            </Droppable>
+          )}
+        </div>
+      );
+    }
+    
+    return null;
+  };
 
   return (
     <div className={styles.container}>
@@ -187,112 +292,11 @@ export default function HabitTable() {
                         {...provided.draggableProps}
                         className={snapshot.isDragging ? styles.dragging : ''}
                       >
-                        {item.type === 'separator' && (
-                          <SeparatorRow 
-                            item={item} 
-                            onEdit={() => openEditModal(item)} 
-                            dragHandleProps={provided.dragHandleProps} 
-                            isEditMode={isEditMode}
-                          />
-                        )}
-                        
-                        {item.type === 'habit' && (
-                          <HabitRow
-                            habit={item}
-                            days={days}
-                            getCellState={getCellState}
-                            onCycleCell={cycleCell}
-                            onEdit={() => openEditModal(item)}
-                            todayIndex={todayIndex}
-                            dragHandleProps={provided.dragHandleProps}
-                            isEditMode={isEditMode}
-                            selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
-                          />
-                        )}
-
-                        {item.type === 'group' && (
-                          <div className={styles.groupSection}>
-                            <GroupRow
-                              group={item}
-                              isCollapsed={isCollapsed(item.id)}
-                              childCount={(() => {
-                                const groupChildren = sortedHabits.filter(h => h.groupId === item.id);
-                                let plannedCount = 0;
-                                groupChildren.forEach(child => {
-                                  const cellState = getCellState(child.id, activeDayIndexForBadge);
-                                  if (cellState === 'done' || cellState === 'planned') {
-                                    plannedCount++;
-                                  }
-                                });
-                                return plannedCount;
-                              })()}
-                              completedCount={(() => {
-                                const groupChildren = sortedHabits.filter(h => h.groupId === item.id);
-                                let completedCount = 0;
-                                groupChildren.forEach(child => {
-                                  const cellState = getCellState(child.id, activeDayIndexForBadge);
-                                  if (cellState === 'done') {
-                                    completedCount++;
-                                  }
-                                });
-                                return completedCount;
-                              })()}
-                              onToggle={() => toggleGroup(item.id)}
-                              onEdit={() => openEditModal(item)}
-                              dragHandleProps={provided.dragHandleProps}
-                              isEditMode={isEditMode}
-                            />
-                            
-                            {!isCollapsed(item.id) && (
-                              <Droppable droppableId={`group-${item.id}`} type={item.id}>
-                                {(providedGroup) => (
-                                  <div 
-                                    className={styles.groupChildren} 
-                                    ref={providedGroup.innerRef} 
-                                    {...providedGroup.droppableProps}
-                                  >
-                                    {sortedHabits.filter(h => h.groupId === item.id).map((child, childIdx) => (
-                                      <Draggable key={child.id} draggableId={child.id} index={childIdx}>
-                                        {(providedChild, snapshotChild) => (
-                                          <div
-                                            ref={providedChild.innerRef}
-                                            {...providedChild.draggableProps}
-                                            className={snapshotChild.isDragging ? styles.dragging : ''}
-                                          >
-                                            {child.type === 'separator' ? (
-                                              <SeparatorRow
-                                                item={child}
-                                                onEdit={() => openEditModal(child)}
-                                                dragHandleProps={providedChild.dragHandleProps}
-                                                isEditMode={isEditMode}
-                                                isChild={true}
-                                              />
-                                            ) : (
-                                              <HabitRow
-                                                habit={child}
-                                                days={days}
-                                                getCellState={getCellState}
-                                                onCycleCell={cycleCell}
-                                                onEdit={() => openEditModal(child)}
-                                                todayIndex={todayIndex}
-                                                dragHandleProps={providedChild.dragHandleProps}
-                                                isEditMode={isEditMode}
-                                                isChild={true}
-                                                groupColor={item.color}
-                                                selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
-                                              />
-                                            )}
-                                          </div>
-                                        )}
-                                      </Draggable>
-                                    ))}
-                                    {providedGroup.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-                            )}
-                          </div>
-                        )}
+                        <RenderNodeWithDrag 
+                           item={item} 
+                           depth={0} 
+                           dragHandleProps={provided.dragHandleProps} 
+                        />
                       </div>
                     )}
                   </Draggable>

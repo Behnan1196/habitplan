@@ -8,12 +8,18 @@ interface Props {
   onEdit: () => void;
   dragHandleProps?: any;
   isEditMode?: boolean;
-  isChild?: boolean;
+  depth?: number;
 }
 
-export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode, isChild }: Props) {
+export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode, depth = 0 }: Props) {
+  const rowStyle: React.CSSProperties = {
+    marginLeft: `${depth * 8}px`,
+    width: `calc(100% - ${depth * 8}px)`,
+    ...(item.backColor ? { backgroundColor: item.backColor } : {})
+  };
+
   return (
-    <div className={`${styles.row} ${isChild ? styles.childRow : ''}`}>
+    <div className={`${styles.row} ${depth > 0 ? styles.childRow : ''}`} style={rowStyle}>
       <div 
         className={styles.dragHandle} 
         {...dragHandleProps}

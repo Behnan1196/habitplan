@@ -14,17 +14,23 @@ interface Props {
   todayIndex: number;
   dragHandleProps?: any;
   isEditMode?: boolean;
-  isChild?: boolean;
+  depth?: number;
   groupColor?: string;
   selectedDayIndex?: number;
 }
 
-export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex, dragHandleProps, isEditMode, isChild, groupColor, selectedDayIndex }: Props) {
+export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdit, todayIndex, dragHandleProps, isEditMode, depth = 0, groupColor, selectedDayIndex }: Props) {
   // Use group color if it's a child, else habit color
-  const effectiveColor = isChild && groupColor ? groupColor : habit.color;
+  const effectiveColor = depth > 0 && groupColor ? groupColor : habit.color;
+
+  const rowStyle: React.CSSProperties = {
+    marginLeft: `${depth * 8}px`,
+    width: `calc(100% - ${depth * 8}px)`,
+    ...(habit.backColor ? { backgroundColor: habit.backColor } : {})
+  };
 
   return (
-    <div className={`${styles.row} ${isChild ? styles.childRow : ''}`}>
+    <div className={`${styles.row} ${depth > 0 ? styles.childRow : ''}`} style={rowStyle}>
       {/* Drag Handle - Always render in DOM but hide visually when not in edit mode */}
       <div 
         className={styles.dragHandle} 

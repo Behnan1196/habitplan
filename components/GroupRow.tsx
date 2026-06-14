@@ -12,16 +12,25 @@ interface Props {
   onEdit: () => void;
   dragHandleProps?: any;
   isEditMode?: boolean;
+  depth?: number;
 }
 
-export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps, isEditMode }: Props) {
+export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps, isEditMode, depth = 0 }: Props) {
   const badgeClass = childCount === 0
     ? styles.badge
     : completedCount === childCount
       ? `${styles.badge} ${styles.badgeDone}`
       : `${styles.badge} ${styles.badgePlanned}`;
+
+  const rowStyle: React.CSSProperties = {
+    '--group-color': group.color,
+    marginLeft: `${depth * 8}px`,
+    width: `calc(100% - ${depth * 8}px)`,
+    ...(group.backColor ? { backgroundColor: group.backColor } : {})
+  } as React.CSSProperties;
+
   return (
-    <div className={styles.groupRow} style={{ '--group-color': group.color } as React.CSSProperties}>
+    <div className={styles.groupRow} style={rowStyle}>
       <div 
         className={styles.dragHandle} 
         {...dragHandleProps}
