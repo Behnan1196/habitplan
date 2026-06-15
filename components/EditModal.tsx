@@ -15,7 +15,7 @@ interface Props {
 
 export default function EditModal({ open, initial, groups, onSave, onDelete, onClose }: Props) {
   const [name, setName] = useState('');
-  const [type, setType] = useState<'habit' | 'group' | 'separator'>('habit');
+  const [type, setType] = useState<'habit' | 'group' | 'separator' | 'metric'>('habit');
   const [color, setColor] = useState(PRESET_COLORS[0].value);
   const [backColor, setBackColor] = useState('');
   const [groupId, setGroupId] = useState<string | null>(null);
@@ -99,6 +99,12 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           >
             Ayıraç
           </button>
+          <button
+            className={`${styles.typeBtn} ${type === 'metric' ? styles.active : ''}`}
+            onClick={() => setType('metric')}
+          >
+            Metrik
+          </button>
         </div>
 
         {/* Name */}
@@ -107,7 +113,7 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           className={styles.input}
           value={name}
           onChange={e => setName(e.target.value)}
-          placeholder={type === 'group' ? 'örn. Vitaminler' : type === 'separator' ? 'örn. SABAH' : 'örn. D Vitamini'}
+          placeholder={type === 'group' ? 'örn. Vitaminler' : type === 'separator' ? 'örn. SABAH' : type === 'metric' ? 'örn. Bel Ölçüsü (cm)' : 'örn. D Vitamini'}
           autoFocus
           onKeyDown={e => e.key === 'Enter' && handleSave()}
         />
@@ -122,7 +128,7 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           rows={2}
         />
 
-        {/* Group select (now available for groups too!) */}
+        {/* Group select (now available for groups, separators, and metrics!) */}
         {groups.length > 0 && (
           <>
             <label className={styles.label}>Grup (opsiyonel)</label>

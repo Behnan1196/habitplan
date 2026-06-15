@@ -1,6 +1,6 @@
-export type CellState = 'empty' | 'planned' | 'done';
+export type CellState = string;
 
-export type HabitType = 'group' | 'habit' | 'separator';
+export type HabitType = 'group' | 'habit' | 'separator' | 'metric';
 
 export interface HabitItem {
   id: string;

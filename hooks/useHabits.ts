@@ -28,13 +28,30 @@ export function useHabits() {
     update(prev => {
       const weekData = prev.weeklyData[currentWeek] ?? {};
       const habitData = weekData[habitId] ?? {};
-      const current: CellState = (habitData[dayIndex] as CellState) ?? 'empty';
-      const next = nextCellState(current);
+      const current = (habitData[dayIndex] as string) ?? 'empty';
+      // If it's not a standard cycle value, fall back to empty
+      const normalizedCurrent = ['empty', 'planned', 'done'].includes(current) ? (current as 'empty' | 'planned' | 'done') : 'empty';
+      const next = nextCellState(normalizedCurrent);
       const newHabitData = { ...habitData };
       if (next === 'empty') {
         delete newHabitData[dayIndex];
       } else {
         newHabitData[dayIndex] = next;
+      }
+      const newWeekData = { ...weekData, [habitId]: newHabitData };
+      return { ...prev, weeklyData: { ...prev.weeklyData, [currentWeek]: newWeekData } };
+    });
+  }, [currentWeek, update]);
+
+  const updateCell = useCallback((habitId: string, dayIndex: number, text: string) => {
+    update(prev => {
+      const weekData = prev.weeklyData[currentWeek] ?? {};
+      const habitData = weekData[habitId] ?? {};
+      const newHabitData = { ...habitData };
+      if (!text.trim()) {
+        delete newHabitData[dayIndex];
+      } else {
+        newHabitData[dayIndex] = text;
       }
       const newWeekData = { ...weekData, [habitId]: newHabitData };
       return { ...prev, weeklyData: { ...prev.weeklyData, [currentWeek]: newWeekData } };
@@ -122,6 +139,7 @@ export function useHabits() {
     currentWeek,
     isCurrentWeek,
     cycleCell,
+    updateCell,
     getCellState,
     toggleGroup,
     isCollapsed,

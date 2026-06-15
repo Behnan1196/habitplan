@@ -8,6 +8,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import HabitRow from './HabitRow';
 import GroupRow from './GroupRow';
 import SeparatorRow from './SeparatorRow';
+import MetricRow from './MetricRow';
 import WeekNavigation from './WeekNavigation';
 import EditModal from './EditModal';
 import BackupModal from './BackupModal';
@@ -18,7 +19,7 @@ export default function HabitTable() {
   const habitsHook = useHabits();
   const {
     state, sortedHabits, currentWeek, isCurrentWeek,
-    cycleCell, getCellState, toggleGroup, isCollapsed,
+    cycleCell, updateCell, getCellState, toggleGroup, isCollapsed,
     addHabit, updateHabit, deleteHabit, reorderHabits, goToPrevWeek, goToNextWeek, goToCurrentWeek
   } = habitsHook;
 
@@ -119,6 +120,24 @@ export default function HabitTable() {
           days={days}
           getCellState={getCellState}
           onCycleCell={cycleCell}
+          onEdit={() => openEditModal(item)}
+          todayIndex={todayIndex}
+          dragHandleProps={dragHandleProps}
+          isEditMode={isEditMode}
+          depth={depth}
+          groupColor={groupColor}
+          selectedDayIndex={viewMode === 'daily' ? selectedDayIndex : undefined}
+        />
+      );
+    }
+
+    if (item.type === 'metric') {
+      return (
+        <MetricRow
+          habit={item}
+          days={days}
+          getCellState={getCellState}
+          onUpdateCell={updateCell}
           onEdit={() => openEditModal(item)}
           todayIndex={todayIndex}
           dragHandleProps={dragHandleProps}
