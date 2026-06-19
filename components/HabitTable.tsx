@@ -12,6 +12,7 @@ import MetricRow from './MetricRow';
 import WeekNavigation from './WeekNavigation';
 import EditModal from './EditModal';
 import BackupModal from './BackupModal';
+import FocusModal from './FocusModal';
 import { DAY_LABELS } from '@/types';
 import styles from './HabitTable.module.css';
 
@@ -30,6 +31,7 @@ export default function HabitTable() {
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('daily');
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);
   const [backupModalOpen, setBackupModalOpen] = useState(false);
+  const [focusModalOpen, setFocusModalOpen] = useState(false);
 
   const days = useMemo(() => getWeekDates(currentWeek), [currentWeek]);
   
@@ -222,6 +224,18 @@ export default function HabitTable() {
           
           <button 
             className={styles.backupHeaderBtn} 
+            onClick={() => setFocusModalOpen(true)}
+            title="Bugünün Planı"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </button>
+          
+          <button 
+            className={styles.backupHeaderBtn} 
             onClick={() => setBackupModalOpen(true)}
             title="Bulut Yedekleme"
           >
@@ -351,6 +365,15 @@ export default function HabitTable() {
           saveState(restoredState);
           window.location.reload();
         }}
+      />
+
+      <FocusModal
+        open={focusModalOpen}
+        onClose={() => setFocusModalOpen(false)}
+        habits={sortedHabits}
+        getCellState={getCellState}
+        onCycleCell={cycleCell}
+        dayIndex={activeDayIndexForBadge}
       />
     </div>
   );

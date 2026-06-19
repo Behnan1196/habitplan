@@ -55,7 +55,7 @@ export default function HabitRow({ habit, days, getCellState, onCycleCell, onEdi
 
       {/* Name */}
       <div className={styles.nameCell}>
-        <button className={styles.nameBtn} onClick={isEditMode ? onEdit : undefined} title={isEditMode ? "Düzenle" : ""}>
+        <button className={styles.nameBtn} onClick={onEdit} title="Detay / Düzenle">
           <div className={styles.nameContent}>
             <div className={styles.nameTop}>
               {/* Dot removed as requested to save space */}

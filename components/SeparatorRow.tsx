@@ -38,17 +38,15 @@ export default function SeparatorRow({ item, onEdit, dragHandleProps, isEditMode
         </svg>
       </div>
       <div className={styles.line}></div>
-      <button className={styles.labelBtn} onClick={isEditMode ? onEdit : undefined} title={isEditMode ? "Ayıracı düzenle" : ""}>
+      <button className={styles.labelBtn} onClick={onEdit} title="Detay / Düzenle">
         {item.name}
       </button>
       <div className={styles.line}></div>
-      {isEditMode && (
-        <button className={styles.editBtn} onClick={onEdit} title="Düzenle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
-          </svg>
-        </button>
-      )}
+      <button className={styles.editBtn} onClick={onEdit} title="Detay / Düzenle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
+        </svg>
+      </button>
     </div>
   );
 }

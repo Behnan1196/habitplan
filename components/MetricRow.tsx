@@ -62,7 +62,7 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
       <div className={styles.colorBar} style={{ background: effectiveColor }} />
 
       <div className={styles.nameCell}>
-        <button className={styles.nameBtn} onClick={isEditMode ? onEdit : undefined} title={isEditMode ? "Düzenle" : ""}>
+        <button className={styles.nameBtn} onClick={onEdit} title="Detay / Düzenle">
           <div className={styles.nameContent}>
             <div className={styles.nameTop}>
               <span className={styles.name}>{habit.name}</span>
