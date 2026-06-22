@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { HabitItem } from '@/types';
 import DayCell from './DayCell';
 import styles from './FocusModal.module.css';
@@ -14,14 +15,24 @@ interface Props {
 }
 
 export default function FocusModal({ open, onClose, habits, getCellState, onCycleCell, dayIndex }: Props) {
+  const [activeHabitIds, setActiveHabitIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      const ids = habits
+        .filter(h => h.type === 'habit' && getCellState(h.id, dayIndex) === 'planned')
+        .map(h => h.id);
+      setActiveHabitIds(ids);
+    } else {
+      setActiveHabitIds([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, dayIndex]);
+
   if (!open) return null;
 
-  // Filter only habits (not metrics or groups or separators) that are 'planned'
-  const plannedHabits = habits.filter(h => {
-    if (h.type !== 'habit') return false;
-    const state = getCellState(h.id, dayIndex);
-    return state === 'planned';
-  });
+  // Filter habits that were 'planned' when the modal opened
+  const plannedHabits = habits.filter(h => activeHabitIds.includes(h.id));
 
   const getGroupPath = (gId: string | null): string => {
     if (!gId) return '';

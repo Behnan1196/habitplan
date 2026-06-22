@@ -59,8 +59,16 @@
   flex-shrink: 0;
 }
 
-.row:hover .editBtn {
-  opacity: 1;
+@media (hover: hover) {
+  .row:hover .editBtn {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .editBtn {
+    opacity: 0.5;
+  }
 }
 
 .editBtn:hover {
