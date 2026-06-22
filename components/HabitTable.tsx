@@ -52,8 +52,8 @@ export default function HabitTable() {
   const groups = sortedHabits.filter(h => h.type === 'group');
   const topLevelItems = sortedHabits.filter(h => !h.groupId);
 
-  const openAddModal = () => {
-    setEditItem(undefined);
+  const openAddModal = (groupId?: string) => {
+    setEditItem(groupId ? { groupId } : undefined);
     setEditModalOpen(true);
   };
 
@@ -164,6 +164,7 @@ export default function HabitTable() {
             completedCount={stats.completed}
             onToggle={() => toggleGroup(item.id)}
             onEdit={() => openEditModal(item)}
+            onAddChild={() => openAddModal(item.id)}
             dragHandleProps={dragHandleProps}
             isEditMode={isEditMode}
             depth={depth}
@@ -244,7 +245,7 @@ export default function HabitTable() {
             </svg>
           </button>
 
-          <button className={styles.addBtn} onClick={openAddModal}>
+          <button className={styles.addBtn} onClick={() => openAddModal()}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
@@ -339,7 +340,7 @@ export default function HabitTable() {
                 {sortedHabits.length === 0 && (
                   <div className={styles.emptyState}>
                     <p>Henüz alışkanlık eklenmemiş.</p>
-                    <button onClick={openAddModal}>İlk alışkanlığını ekle</button>
+                    <button onClick={() => openAddModal()}>İlk alışkanlığını ekle</button>
                   </div>
                 )}
               </div>

@@ -10,12 +10,13 @@ interface Props {
   completedCount: number;
   onToggle: () => void;
   onEdit: () => void;
+  onAddChild?: () => void;
   dragHandleProps?: any;
   isEditMode?: boolean;
   depth?: number;
 }
 
-export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, dragHandleProps, isEditMode, depth = 0 }: Props) {
+export default function GroupRow({ group, isCollapsed, childCount, completedCount, onToggle, onEdit, onAddChild, dragHandleProps, isEditMode, depth = 0 }: Props) {
   const badgeClass = childCount === 0
     ? styles.badge
     : completedCount === childCount
@@ -61,6 +62,12 @@ export default function GroupRow({ group, isCollapsed, childCount, completedCoun
         <span className={badgeClass}>
           {completedCount}/{childCount}
         </span>
+      </button>
+      <button className={styles.addBtn} onClick={onAddChild} title="İçine Ekle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
       </button>
       <button className={styles.editBtn} onClick={onEdit} title="Detay / Düzenle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

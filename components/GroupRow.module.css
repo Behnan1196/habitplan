@@ -72,11 +72,12 @@
   background: #10b981; /* Green */
 }
 
-.editBtn {
+.editBtn,
+.addBtn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 8px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -87,22 +88,26 @@
 }
 
 @media (hover: hover) {
-  .groupRow:hover .editBtn {
+  .groupRow:hover .editBtn,
+  .groupRow:hover .addBtn {
     opacity: 1;
   }
 }
 
 @media (hover: none) {
-  .editBtn {
+  .editBtn,
+  .addBtn {
     opacity: 0.5;
   }
 }
 
-.editBtn:hover {
+.editBtn:hover,
+.addBtn:hover {
   color: var(--text-primary);
 }
 
-.editBtn svg {
+.editBtn svg,
+.addBtn svg {
   width: 16px;
   height: 16px;
 }
