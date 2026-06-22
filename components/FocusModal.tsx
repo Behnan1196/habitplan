@@ -34,13 +34,37 @@ export default function FocusModal({ open, onClose, habits, getCellState, onCycl
   // Filter habits that were 'planned' when the modal opened
   const plannedHabits = habits.filter(h => activeHabitIds.includes(h.id));
 
-  const getGroupPath = (gId: string | null): string => {
-    if (!gId) return '';
-    const g = habits.find(x => x.id === gId);
-    if (!g) return '';
-    if (!g.groupId) return g.name;
-    return getGroupPath(g.groupId) + ' > ' + g.name;
-  };
+  const getGroup = (gId: string) => habits.find(x => x.id === gId);
+
+  const groupedHabits: Record<string, HabitItem[]> = {};
+  const noGroupHabits: HabitItem[] = [];
+
+  plannedHabits.forEach(h => {
+    if (h.groupId) {
+      const topLevelGroupId = h.groupId; // We could resolve the ultimate top-level group, but the immediate parent group is fine since the user said "ait olduğu grup". 
+      // Actually, if we just use immediate parent, we might have multiple subgroups. Let's just group by immediate parent.
+      if (!groupedHabits[topLevelGroupId]) groupedHabits[topLevelGroupId] = [];
+      groupedHabits[topLevelGroupId].push(h);
+    } else {
+      noGroupHabits.push(h);
+    }
+  });
+
+  const renderHabitRow = (habit: HabitItem) => (
+    <div key={habit.id} className={styles.itemRow}>
+      <div className={styles.colorIndicator} style={{ backgroundColor: habit.color }} />
+      <div className={styles.itemDetails}>
+        <div className={styles.itemName}>{habit.name}</div>
+        {habit.notes && <div className={styles.notes}>{habit.notes}</div>}
+      </div>
+      <DayCell
+        state={getCellState(habit.id, dayIndex) as any}
+        onClick={() => onCycleCell(habit.id, dayIndex)}
+        isToday={true}
+        large={true}
+      />
+    </div>
+  );
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -67,23 +91,28 @@ export default function FocusModal({ open, onClose, habits, getCellState, onCycl
               <p>Harika! Bugün için planlanan tüm görevleri tamamladınız veya henüz plan yapmadınız.</p>
             </div>
           ) : (
-            plannedHabits.map(habit => (
-              <div key={habit.id} className={styles.itemRow}>
-                <div className={styles.colorIndicator} style={{ backgroundColor: habit.color }} />
-                <div className={styles.itemDetails}>
-                  <div className={styles.itemName}>{habit.name}</div>
-                  {habit.groupId && (
-                    <div className={styles.groupPath}>{getGroupPath(habit.groupId)}</div>
+            <div className={styles.groupedList}>
+              {Object.entries(groupedHabits).map(([groupId, items]) => {
+                const group = getGroup(groupId);
+                return (
+                  <div key={groupId} className={styles.groupContainer}>
+                    <div className={styles.groupHeader} style={{ color: group?.color || 'var(--text-primary)' }}>
+                      {group ? group.name : 'Bilinmeyen Grup'}
+                    </div>
+                    {items.map(renderHabitRow)}
+                  </div>
+                );
+              })}
+              
+              {noGroupHabits.length > 0 && (
+                <div className={styles.groupContainer}>
+                  {Object.keys(groupedHabits).length > 0 && (
+                    <div className={styles.groupHeader}>Diğer Görevler</div>
                   )}
+                  {noGroupHabits.map(renderHabitRow)}
                 </div>
-                <DayCell
-                  state={getCellState(habit.id, dayIndex) as any}
-                  onClick={() => onCycleCell(habit.id, dayIndex)}
-                  isToday={true}
-                  large={true}
-                />
-              </div>
-            ))
+              )}
+            </div>
           )}
         </div>
       </div>

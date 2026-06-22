@@ -35,9 +35,14 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
   if (!open) return null;
 
   const handleSave = () => {
-    if (!name.trim()) return;
+    let trimmedName = name.trim();
+    if (!trimmedName) return;
+
+    // Capitalize first letter to ensure consistency
+    trimmedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+
     onSave({ 
-      name: name.trim(), 
+      name: trimmedName, 
       type, 
       color, 
       backColor: backColor || undefined,
@@ -115,6 +120,7 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           onChange={e => setName(e.target.value)}
           placeholder={type === 'group' ? 'örn. Vitaminler' : type === 'separator' ? 'örn. SABAH' : type === 'metric' ? 'örn. Bel Ölçüsü (cm)' : 'örn. D Vitamini'}
           autoFocus
+          autoCapitalize="sentences"
           onKeyDown={e => e.key === 'Enter' && handleSave()}
         />
 
