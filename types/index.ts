@@ -40,6 +40,7 @@ export const PRESET_COLORS = [
   { label: 'Teal',    value: '#14b8a6' },
   { label: 'Mavi',    value: '#3b82f6' },
   { label: 'Gri',     value: '#6b7280' },
+  { label: 'Beyaz',   value: '#ffffff' },
 ];
 
 export const DAY_LABELS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
