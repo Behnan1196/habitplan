@@ -87,11 +87,11 @@
 }
 
 .inputWrapper {
-  width: 32px;
+  width: 64px;
   height: 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .inputWrapperLarge {
@@ -107,7 +107,7 @@
   border-radius: 6px;
   background: var(--surface-2);
   color: var(--text-primary);
-  text-align: center;
+  text-align: right;
   font-size: 0.75rem;
   font-weight: 500;
   transition: all 0.2s;

@@ -181,22 +181,25 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           
           <div style={{ flex: 1 }}>
             <label className={styles.label}>Arka Plan Rengi</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <input 
-                type="color" 
-                value={backColor || '#2c2e3e'} 
-                onChange={e => setBackColor(e.target.value)} 
-                style={{ width: '40px', height: '40px', padding: 0, border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-              />
-              {backColor && (
-                <button 
-                  onClick={() => setBackColor('')}
-                  style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
-                >
-                  Temizle
-                </button>
-              )}
+            <div className={styles.colorGrid}>
+              {PRESET_COLORS.map(c => (
+                <button
+                  key={c.value}
+                  className={`${styles.colorDot} ${backColor === c.value ? styles.selectedColor : ''}`}
+                  style={{ backgroundColor: c.value }}
+                  onClick={() => setBackColor(c.value)}
+                  title={c.label}
+                />
+              ))}
             </div>
+            {backColor && (
+              <button
+                onClick={() => setBackColor('')}
+                style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-muted)', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', marginTop: '8px' }}
+              >
+                Temizle
+              </button>
+            )}
           </div>
         </div>
 
