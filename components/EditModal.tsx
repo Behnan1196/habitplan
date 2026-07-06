@@ -15,6 +15,8 @@ interface Props {
 
 export default function EditModal({ open, initial, groups, onSave, onDelete, onClose }: Props) {
   const [name, setName] = useState('');
+  const [min, setMin] = useState<number | undefined>(undefined);
+  const [max, setMax] = useState<number | undefined>(undefined);
   const [type, setType] = useState<'habit' | 'group' | 'metric'>('habit');
   const [color, setColor] = useState(PRESET_COLORS[0].value);
   const [backColor, setBackColor] = useState('');
@@ -130,6 +132,28 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
           placeholder="Bu öğe ile ilgili ek bilgiler..."
           rows={2}
         />
+
+        {/* KPI range inputs */}
+        {(type === 'metric') && (
+          <>
+            <label className={styles.label}>Minimum Değer</label>
+            <input
+              type="number"
+              className={styles.input}
+              value={min ?? ''}
+              onChange={e => setMin(e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Örn. 67"
+            />
+            <label className={styles.label}>Maksimum Değer</label>
+            <input
+              type="number"
+              className={styles.input}
+              value={max ?? ''}
+              onChange={e => setMax(e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="Örn. 70"
+            />
+          </>
+        )}
 
         {/* isFixed toggle */}
         {type !== 'metric' && (

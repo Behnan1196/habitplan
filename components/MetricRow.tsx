@@ -29,12 +29,20 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
 
   const renderInput = (dayIdx: number, isLarge: boolean) => {
     const val = getCellState(habit.id, dayIdx) || '';
+    // Determine KPI range styling
+    const numericVal = parseFloat(val);
+    const min = habit.min;
+    const max = habit.max;
+    const inRange =
+      !isNaN(numericVal) && min !== undefined && max !== undefined && numericVal >= min && numericVal <= max;
+    const rangeClass = inRange ? styles.inRange : styles.outOfRange;
     // Use local state for immediate typing feedback, then sync on blur
     return (
       <MetricInput 
         initialValue={val === 'empty' ? '' : val} 
         onBlur={(newVal) => onUpdateCell(habit.id, dayIdx, newVal)}
         isLarge={isLarge}
+        className={rangeClass}
       />
     );
   };
@@ -90,7 +98,7 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
 }
 
 // Inner component to handle local typing state vs global state sync
-function MetricInput({ initialValue, onBlur, isLarge }: { initialValue: string, onBlur: (val: string) => void, isLarge: boolean }) {
+function MetricInput({ initialValue, onBlur, isLarge, className }: { initialValue: string, onBlur: (val: string) => void, isLarge: boolean, className?: string }) {
   const [val, setVal] = useState(initialValue);
 
   // Sync if external state changes
@@ -101,7 +109,7 @@ function MetricInput({ initialValue, onBlur, isLarge }: { initialValue: string, 
   return (
     <input
       type="text"
-      className={styles.metricInput}
+      className={`${styles.metricInput} ${className ? className : ''}`}
       value={val}
       onChange={(e) => setVal(e.target.value)}
       onBlur={() => onBlur(val)}
@@ -113,4 +121,4 @@ function MetricInput({ initialValue, onBlur, isLarge }: { initialValue: string, 
       placeholder={isLarge ? "Değer girin..." : "-"}
     />
   );
-}
+};

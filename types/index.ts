@@ -12,6 +12,9 @@ export interface HabitItem {
   order: number;
   notes?: string;
   isFixed?: boolean; // true = persistent across weeks (todo-style)
+  // KPI range for metric items
+  min?: number;
+  max?: number;
 }
 
 export interface WeeklyData {

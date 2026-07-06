@@ -122,14 +122,18 @@
 
 .inputWrapperLarge .metricInput {
   font-size: 1rem;
-  text-align: left;
+  text-align: right;
   padding: 0 12px;
   background: var(--surface-1);
   border: 1px solid var(--border);
 }
 
-.inputWrapperLarge .metricInput:focus {
-  border-color: var(--text-primary);
+.metricInput.inRange {
+  background-color: #a8e6cf; /* light green */
+}
+
+.metricInput.outOfRange {
+  background-color: #ffd166; /* light yellow */
 }
 
 .dragHandle {
