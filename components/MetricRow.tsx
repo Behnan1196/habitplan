@@ -24,7 +24,7 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
   const rowStyle: React.CSSProperties = {
     marginLeft: `${depth * 8}px`,
     width: `calc(100% - ${depth * 8}px)`,
-    ...(habit.backColor ? { backgroundColor: habit.backColor } : {})
+    ...(habit.type !== 'metric' && habit.backColor ? { backgroundColor: habit.backColor } : {})
   };
 
   const renderInput = (dayIdx: number, isLarge: boolean) => {
@@ -43,6 +43,7 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
         onBlur={(newVal) => onUpdateCell(habit.id, dayIdx, newVal)}
         isLarge={isLarge}
         className={rangeClass}
+        inputType={habit.type === 'metric' ? 'number' : 'text'}
       />
     );
   };
@@ -98,7 +99,7 @@ export default function MetricRow({ habit, days, getCellState, onUpdateCell, onE
 }
 
 // Inner component to handle local typing state vs global state sync
-function MetricInput({ initialValue, onBlur, isLarge, className }: { initialValue: string, onBlur: (val: string) => void, isLarge: boolean, className?: string }) {
+function MetricInput({ initialValue, onBlur, isLarge, className, inputType }: { initialValue: string, onBlur: (val: string) => void, isLarge: boolean, className?: string, inputType: 'number' | 'text' }) {
   const [val, setVal] = useState(initialValue);
 
   // Sync if external state changes
@@ -108,7 +109,7 @@ function MetricInput({ initialValue, onBlur, isLarge, className }: { initialValu
 
   return (
     <input
-      type="text"
+      type={inputType}
       className={`${styles.metricInput} ${className ? className : ''}`}
       value={val}
       onChange={(e) => setVal(e.target.value)}
