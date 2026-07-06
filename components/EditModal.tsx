@@ -47,12 +47,14 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
 
     onSave({ 
       name: trimmedName, 
-      type, 
-      color, 
+      type,
+      color,
       backColor: backColor || undefined,
       groupId,
       notes: notes.trim(),
       isFixed,
+      min: min ?? undefined,
+      max: max ?? undefined,
     });
     onClose();
   };
