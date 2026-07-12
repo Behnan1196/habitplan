@@ -2,6 +2,18 @@ export type CellState = string;
 
 export type HabitType = 'group' | 'habit' | 'metric';
 
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Timeblock {
+  id: string;
+  name: string;
+  order: number;
+}
+
 export interface HabitItem {
   id: string;
   type: HabitType;
@@ -15,6 +27,10 @@ export interface HabitItem {
   // KPI range for metric items
   min?: number;
   max?: number;
+  // Tags, duration and timeblocks
+  tagId?: string; // Links to predefined tags
+  duration?: number; // Estimated duration in minutes
+  defaultTimeblockId?: string; // Optional default timeblock link
 }
 
 export interface WeeklyData {
@@ -44,6 +60,22 @@ export const PRESET_COLORS = [
   { label: 'Mavi',    value: '#3b82f6' },
   { label: 'Gri',     value: '#6b7280' },
   { label: 'Beyaz',   value: '#ffffff' },
+];
+
+export const PRESET_TAGS: Tag[] = [
+  { id: 'tag-mental', name: 'Mental', color: '#6366f1' },
+  { id: 'tag-work', name: 'İş', color: '#3b82f6' },
+  { id: 'tag-workout', name: 'Workout', color: '#ef4444' },
+  { id: 'tag-social', name: 'Sosyal', color: '#ec4899' },
+  { id: 'tag-fun', name: 'Eğlence', color: '#f97316' },
+];
+
+export const PRESET_TIMEBLOCKS: Timeblock[] = [
+  { id: 'tb-morning', name: 'Sabah Rutini', order: 1 },
+  { id: 'tb-work1', name: 'Çalışma Bloğu-1', order: 2 },
+  { id: 'tb-work2', name: 'Çalışma Bloğu-2', order: 3 },
+  { id: 'tb-workout', name: 'Workout-Akşam', order: 4 },
+  { id: 'tb-night', name: 'Gece/Kapanış', order: 5 },
 ];
 
 export const DAY_LABELS = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];

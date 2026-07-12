@@ -80,6 +80,71 @@ export function useHabits() {
     return (state.weeklyData[weekKey]?.[habitId]?.[dayIndex] as CellState) ?? 'empty';
   }, [state, getWeekKeyForHabit]);
 
+  const toggleTimeblockInCell = useCallback((habitId: string, dayIndex: number, timeblockId: string) => {
+    update(prev => {
+      const weekKey = getWeekKeyForHabit(habitId);
+      const weekData = prev.weeklyData[weekKey] ?? {};
+      const habitData = weekData[habitId] ?? {};
+      const raw = habitData[dayIndex] ?? '';
+      
+      let parsed: Record<string, 'planned' | 'done'> = {};
+      try {
+        if (raw && (raw.startsWith('{') || raw.startsWith('['))) {
+          parsed = JSON.parse(raw);
+        } else if (raw === 'planned' || raw === 'done') {
+          // Upgrade old format: if a task had a default timeblock, use it, else put in a default block
+          const habit = prev.habits.find(h => h.id === habitId);
+          const blockId = habit?.defaultTimeblockId || 'tb-morning';
+          parsed[blockId] = raw as 'planned' | 'done';
+        }
+      } catch (e) {
+        // Fallback
+      }
+
+      if (parsed[timeblockId]) {
+        delete parsed[timeblockId];
+      } else {
+        parsed[timeblockId] = 'planned';
+      }
+
+      const newHabitData = { ...habitData };
+      if (Object.keys(parsed).length === 0) {
+        delete newHabitData[dayIndex];
+      } else {
+        newHabitData[dayIndex] = JSON.stringify(parsed);
+      }
+
+      const newWeekData = { ...weekData, [habitId]: newHabitData };
+      return { ...prev, weeklyData: { ...prev.weeklyData, [weekKey]: newWeekData } };
+    });
+  }, [getWeekKeyForHabit, update]);
+
+  const toggleTimeblockDoneInCell = useCallback((habitId: string, dayIndex: number, timeblockId: string) => {
+    update(prev => {
+      const weekKey = getWeekKeyForHabit(habitId);
+      const weekData = prev.weeklyData[weekKey] ?? {};
+      const habitData = weekData[habitId] ?? {};
+      const raw = habitData[dayIndex] ?? '';
+      
+      let parsed: Record<string, 'planned' | 'done'> = {};
+      try {
+        if (raw && (raw.startsWith('{') || raw.startsWith('['))) {
+          parsed = JSON.parse(raw);
+        }
+      } catch (e) {}
+
+      if (parsed[timeblockId]) {
+        parsed[timeblockId] = parsed[timeblockId] === 'done' ? 'planned' : 'done';
+      }
+
+      const newHabitData = { ...habitData };
+      newHabitData[dayIndex] = JSON.stringify(parsed);
+
+      const newWeekData = { ...weekData, [habitId]: newHabitData };
+      return { ...prev, weeklyData: { ...prev.weeklyData, [weekKey]: newWeekData } };
+    });
+  }, [getWeekKeyForHabit, update]);
+
   // --- Group collapse ---
   const toggleGroup = useCallback((groupId: string) => {
     update(prev => {
@@ -158,6 +223,8 @@ export function useHabits() {
     cycleCell,
     updateCell,
     getCellState,
+    toggleTimeblockInCell,
+    toggleTimeblockDoneInCell,
     getWeekKeyForHabit,
     toggleGroup,
     isCollapsed,

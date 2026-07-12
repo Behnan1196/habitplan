@@ -1,6 +1,4 @@
-'use client';
-
-import { HabitItem, PRESET_COLORS } from '@/types';
+import { HabitItem, PRESET_COLORS, PRESET_TAGS, PRESET_TIMEBLOCKS } from '@/types';
 import { useState, useEffect, useMemo } from 'react';
 import styles from './EditModal.module.css';
 
@@ -24,6 +22,11 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
   const [notes, setNotes] = useState('');
   const [isFixed, setIsFixed] = useState(false);
 
+  // New state fields
+  const [tagId, setTagId] = useState<string>('');
+  const [duration, setDuration] = useState<number | undefined>(undefined);
+  const [defaultTimeblockId, setDefaultTimeblockId] = useState<string>('');
+
   useEffect(() => {
     if (open) {
       setName(initial?.name ?? '');
@@ -35,6 +38,9 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
       setIsFixed(initial?.isFixed ?? false);
       setMin(initial?.min ?? undefined);
       setMax(initial?.max ?? undefined);
+      setTagId(initial?.tagId ?? '');
+      setDuration(initial?.duration ?? undefined);
+      setDefaultTimeblockId(initial?.defaultTimeblockId ?? '');
     }
   }, [open, initial]);
 
@@ -57,6 +63,9 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
       isFixed,
       min: min ?? undefined,
       max: max ?? undefined,
+      tagId: tagId || undefined,
+      duration: duration ?? undefined,
+      defaultTimeblockId: defaultTimeblockId || undefined,
     });
     onClose();
   };
@@ -157,6 +166,49 @@ export default function EditModal({ open, initial, groups, onSave, onDelete, onC
               placeholder="Örn. 70"
             />
           </>
+        )}
+
+        {/* Tags, Duration, and Default Timeblocks for habits */}
+        {type === 'habit' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px', marginBottom: '8px' }}>
+            <div>
+              <label className={styles.label}>Etiket</label>
+              <select
+                className={styles.select}
+                value={tagId}
+                onChange={e => setTagId(e.target.value)}
+              >
+                <option value="">— Seçilmedi —</option>
+                {PRESET_TAGS.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={styles.label}>Süre (Dakika)</label>
+              <input
+                type="number"
+                className={styles.input}
+                value={duration ?? ''}
+                onChange={e => setDuration(e.target.value ? Number(e.target.value) : undefined)}
+                placeholder="Örn. 30"
+                min="1"
+              />
+            </div>
+            <div style={{ gridColumn: 'span 2' }}>
+              <label className={styles.label}>Varsayılan Zaman Dilimi</label>
+              <select
+                className={styles.select}
+                value={defaultTimeblockId}
+                onChange={e => setDefaultTimeblockId(e.target.value)}
+              >
+                <option value="">— Seçilmedi —</option>
+                {PRESET_TIMEBLOCKS.map(tb => (
+                  <option key={tb.id} value={tb.id}>{tb.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         )}
 
         {/* isFixed toggle */}

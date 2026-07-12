@@ -72,6 +72,17 @@
   opacity: 0.8;
 }
 
+.tagBadge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+  margin-left: 6px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .childRow {
   background: var(--surface-2);
 }

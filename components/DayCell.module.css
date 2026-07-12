@@ -84,3 +84,40 @@
   height: 18px;
 }
 
+/* Partial done (some timeblocks done, some planned) */
+.partial {
+  background: rgba(234, 179, 8, 0.1);
+  border-color: rgba(34, 197, 94, 0.5);
+  border-style: dashed;
+  color: #22c55e;
+}
+
+.partial:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+}
+
+/* Multi-dot container for timeblock states */
+.multiDotContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.miniDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.miniDotPlanned {
+  background: #eab308;
+}
+
+.miniDotDone {
+  background: #22c55e;
+}

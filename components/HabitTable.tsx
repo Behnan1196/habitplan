@@ -19,7 +19,7 @@ export default function HabitTable() {
   const habitsHook = useHabits();
   const {
     state, sortedHabits, currentWeek, isCurrentWeek,
-    cycleCell, updateCell, getCellState, toggleGroup, isCollapsed,
+    cycleCell, updateCell, getCellState, toggleTimeblockInCell, toggleTimeblockDoneInCell, toggleGroup, isCollapsed,
     addHabit, updateHabit, deleteHabit, reorderHabits, goToPrevWeek, goToNextWeek, goToCurrentWeek
   } = habitsHook;
 
@@ -118,6 +118,7 @@ export default function HabitTable() {
           days={days}
           getCellState={getCellState}
           onCycleCell={cycleCell}
+          onToggleTimeblock={toggleTimeblockInCell}
           onEdit={() => openEditModal(item)}
           todayIndex={todayIndex}
           dragHandleProps={dragHandleProps}
@@ -371,7 +372,7 @@ export default function HabitTable() {
         onClose={() => setFocusModalOpen(false)}
         habits={sortedHabits}
         getCellState={getCellState}
-        onCycleCell={cycleCell}
+        onToggleTimeblockDone={toggleTimeblockDoneInCell}
         dayIndex={activeDayIndexForBadge}
       />
     </div>

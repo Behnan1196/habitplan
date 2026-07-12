@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HabitItem } from '@/types';
-import DayCell from './DayCell';
+import { HabitItem, PRESET_TIMEBLOCKS, PRESET_TAGS } from '@/types';
 import styles from './FocusModal.module.css';
 
 interface Props {
@@ -10,91 +9,79 @@ interface Props {
   onClose: () => void;
   habits: HabitItem[];
   getCellState: (habitId: string, dayIndex: number) => string;
-  onCycleCell: (habitId: string, dayIndex: number) => void;
+  onToggleTimeblockDone: (habitId: string, dayIndex: number, timeblockId: string) => void;
   dayIndex: number;
 }
 
-export default function FocusModal({ open, onClose, habits, getCellState, onCycleCell, dayIndex }: Props) {
-  const [activeHabitIds, setActiveHabitIds] = useState<string[]>([]);
+export default function FocusModal({ open, onClose, habits, getCellState, onToggleTimeblockDone, dayIndex }: Props) {
+  const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    if (open) {
-      const ids = habits
-        .filter(h => h.type === 'habit' && getCellState(h.id, dayIndex) === 'planned')
-        .map(h => h.id);
-      setActiveHabitIds(ids);
-    } else {
-      setActiveHabitIds([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, dayIndex]);
+  // Re-render when open changes so we always see fresh state
+  useEffect(() => { if (open) setTick(t => t + 1); }, [open, dayIndex]);
 
   if (!open) return null;
 
-  // Filter habits that were 'planned' when the modal opened
-  const plannedHabits = habits.filter(h => activeHabitIds.includes(h.id));
+  // Build a map: timblockId -> list of { habit, state }
+  const timeblockMap: Record<string, { habit: HabitItem; state: 'planned' | 'done' }[]> = {};
+  const legacyPlanned: HabitItem[] = []; // old-style planned/done (not JSON)
 
-  // Helper to build full hierarchical name and path of a group
-  const getGroupPath = (gId: string): string => {
-    const group = habits.find(x => x.id === gId);
-    if (!group) return '';
-    if (!group.groupId) return group.name;
-    const parentPath = getGroupPath(group.groupId);
-    return parentPath ? `${parentPath} / ${group.name}` : group.name;
-  };
+  habits.filter(h => h.type === 'habit').forEach(habit => {
+    const raw = getCellState(habit.id, dayIndex);
+    if (!raw || raw === 'empty') return;
 
-  // Generate the exact flattened visual sequence of groups and non-group items as they appear in the accordion
-  const visualSequence: { type: 'group' | 'no-group', id: string, name: string, color?: string, backColor?: string }[] = [];
-  
-  const traverse = (parentId: string | null) => {
-    const children = habits.filter(h => h.groupId === parentId);
-    children.forEach(child => {
-      if (child.type === 'group') {
-        visualSequence.push({
-          type: 'group',
-          id: child.id,
-          name: getGroupPath(child.id),
-          color: child.color,
-          backColor: child.backColor
+    if (raw.startsWith('{') || raw.startsWith('[')) {
+      try {
+        const blocks: Record<string, 'planned' | 'done'> = JSON.parse(raw);
+        Object.entries(blocks).forEach(([tbId, state]) => {
+          if (!timeblockMap[tbId]) timeblockMap[tbId] = [];
+          timeblockMap[tbId].push({ habit, state });
         });
-        traverse(child.id);
-      }
-    });
-  };
-  traverse(null);
-
-  const groupedHabits: Record<string, HabitItem[]> = {};
-  const noGroupHabits: HabitItem[] = [];
-
-  plannedHabits.forEach(h => {
-    if (h.groupId) {
-      if (!groupedHabits[h.groupId]) groupedHabits[h.groupId] = [];
-      groupedHabits[h.groupId].push(h);
-    } else {
-      noGroupHabits.push(h);
+      } catch (e) {}
+    } else if (raw === 'planned' || raw === 'done') {
+      legacyPlanned.push(habit);
     }
   });
 
-  // Filter visualSequence groups to only those containing planned items
-  const activeOrderedGroups = visualSequence.filter(entry => 
-    entry.type === 'group' && groupedHabits[entry.id] && groupedHabits[entry.id].length > 0
-  );
+  // Sort timeblocks by their preset order
+  const activeTimeblocks = PRESET_TIMEBLOCKS.filter(tb => timeblockMap[tb.id]?.length > 0);
+  const hasAny = activeTimeblocks.length > 0 || legacyPlanned.length > 0;
 
-  const renderHabitRow = (habit: HabitItem) => (
-    <div key={habit.id} className={styles.itemRow}>
-      <div className={styles.colorIndicator} style={{ backgroundColor: habit.color }} />
-      <div className={styles.itemDetails}>
-        <div className={styles.itemName}>{habit.name}</div>
-        {habit.notes && <div className={styles.notes}>{habit.notes}</div>}
+  const renderHabitEntry = (habit: HabitItem, tbId: string, state: 'planned' | 'done') => {
+    const tag = PRESET_TAGS.find(t => t.id === habit.tagId);
+    return (
+      <div key={`${habit.id}-${tbId}`} className={`${styles.itemRow} ${state === 'done' ? styles.itemRowDone : ''}`}>
+        <div className={styles.colorIndicator} style={{ backgroundColor: habit.color }} />
+        <div className={styles.itemDetails}>
+          <div className={styles.itemName}>
+            {habit.name}
+            {tag && (
+              <span className={styles.tagBadge} style={{ background: tag.color + '33', color: tag.color }}>
+                {tag.name}
+              </span>
+            )}
+          </div>
+          {habit.duration && (
+            <div className={styles.duration}>⏱ {habit.duration} dk</div>
+          )}
+        </div>
+        <button
+          className={`${styles.doneBtn} ${state === 'done' ? styles.doneBtnActive : ''}`}
+          onClick={() => onToggleTimeblockDone(habit.id, dayIndex, tbId)}
+          title={state === 'done' ? 'Tamamlandı - geri al' : 'Tamamlandı işaretle'}
+        >
+          {state === 'done' ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          )}
+        </button>
       </div>
-      <DayCell
-        state={getCellState(habit.id, dayIndex) as any}
-        onClick={() => onCycleCell(habit.id, dayIndex)}
-        isToday={true}
-        large={true}
-      />
-    </div>
-  );
+    );
+  };
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -112,49 +99,53 @@ export default function FocusModal({ open, onClose, habits, getCellState, onCycl
         </div>
 
         <div className={styles.content}>
-          {plannedHabits.length === 0 ? (
+          {!hasAny ? (
             <div className={styles.emptyState}>
               <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
               <p>Harika! Bugün için planlanan tüm görevleri tamamladınız veya henüz plan yapmadınız.</p>
+              <p className={styles.emptyHint}>Bir görevin hücresine tıklayarak zaman dilimine ekleyebilirsiniz.</p>
             </div>
           ) : (
             <div className={styles.groupedList}>
-              {activeOrderedGroups.map(group => {
-                const items = groupedHabits[group.id];
-                const displayName = getGroupPath(group.id);
-                const headerStyle: React.CSSProperties = {
-                  color: group.color,
-                  borderLeft: `4px solid ${group.color}`,
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  marginBottom: '8px',
-                  fontSize: '0.8rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  background: group.backColor || 'var(--surface-2)',
-                  display: 'flex',
-                  alignItems: 'center'
-                };
+              {/* Timeblock sections */}
+              {activeTimeblocks.map(tb => {
+                const entries = timeblockMap[tb.id];
+                const doneCount = entries.filter(e => e.state === 'done').length;
+                const totalCount = entries.length;
                 return (
-                  <div key={group.id} className={styles.groupContainer}>
-                    <div style={headerStyle}>
-                      {displayName}
+                  <div key={tb.id} className={styles.groupContainer}>
+                    <div className={styles.timblockHeader}>
+                      <span className={styles.timeblockName}>{tb.name}</span>
+                      <span className={`${styles.tbBadge} ${doneCount === totalCount ? styles.tbBadgeDone : ''}`}>
+                        {doneCount}/{totalCount}
+                      </span>
                     </div>
-                    {items.map(renderHabitRow)}
+                    {entries.map(({ habit, state }) => renderHabitEntry(habit, tb.id, state))}
                   </div>
                 );
               })}
-              
-              {noGroupHabits.length > 0 && (
+
+              {/* Legacy planned (old-style) */}
+              {legacyPlanned.length > 0 && (
                 <div className={styles.groupContainer}>
-                  {activeOrderedGroups.length > 0 && (
-                    <div className={styles.groupHeader}>Diğer Görevler</div>
-                  )}
-                  {noGroupHabits.map(renderHabitRow)}
+                  <div className={styles.groupHeader}>Diğer Planlar</div>
+                  {legacyPlanned.map(h => {
+                    const tag = PRESET_TAGS.find(t => t.id === h.tagId);
+                    return (
+                      <div key={h.id} className={styles.itemRow}>
+                        <div className={styles.colorIndicator} style={{ backgroundColor: h.color }} />
+                        <div className={styles.itemDetails}>
+                          <div className={styles.itemName}>
+                            {h.name}
+                            {tag && <span className={styles.tagBadge} style={{ background: tag.color + '33', color: tag.color }}>{tag.name}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
